@@ -12,6 +12,7 @@ interface TaskInput {
 interface TaskUpdate {
   title?: string;
   description?: string;
+  status?: Task['status'];
 }
 
 interface TasksContextValue {

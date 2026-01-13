@@ -8,9 +8,15 @@ interface TaskItemProps {
   task: Task;
   onPress?: (taskId: string) => void;
   onDelete?: (taskId: string) => void;
+  onToggleStatus?: (taskId: string) => void;
 }
 
-export default function TaskItem({ task, onPress, onDelete }: TaskItemProps) {
+export default function TaskItem({
+  task,
+  onPress,
+  onDelete,
+  onToggleStatus,
+}: TaskItemProps) {
   const [isSwipeOpen, setIsSwipeOpen] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
   const statusLabel = task.status === 'completed' ? 'Completed' : 'Pending';
@@ -74,14 +80,30 @@ export default function TaskItem({ task, onPress, onDelete }: TaskItemProps) {
           disabled={!onPress || isSwipeOpen || isSwiping}
         >
           <View style={styles.titleRow}>
-            <Text style={[styles.statusIcon, { color: statusColor }]}>
-              {statusIcon}
-            </Text>
+            <Pressable
+              style={styles.statusBadge}
+              onPress={
+                onToggleStatus ? () => onToggleStatus(task.id) : undefined
+              }
+              disabled={!onToggleStatus}
+            >
+              <Text style={[styles.statusIcon, { color: statusColor }]}>
+                {statusIcon}
+              </Text>
+            </Pressable>
             <Text style={styles.title}>{task.title}</Text>
           </View>
-          <Text style={[styles.status, { color: statusColor }]}>
-            {statusLabel}
-          </Text>
+          <Pressable
+            style={styles.statusRow}
+            onPress={
+              onToggleStatus ? () => onToggleStatus(task.id) : undefined
+            }
+            disabled={!onToggleStatus}
+          >
+            <Text style={[styles.status, { color: statusColor }]}>
+              {statusLabel}
+            </Text>
+          </Pressable>
           <Text style={styles.description} numberOfLines={2}>
             {task.description}
           </Text>
@@ -113,9 +135,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   statusIcon: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '700',
-    marginRight: 8,
   },
   title: {
     fontSize: 16,
@@ -127,6 +148,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 6,
+  },
+  statusRow: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
   description: {
     fontSize: 14,
