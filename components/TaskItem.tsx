@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Task } from '../models/task';
 
 interface TaskItemProps {
   task: Task;
+  onPress?: (taskId: string) => void;
 }
 
-export default function TaskItem({ task }: TaskItemProps) {
+export default function TaskItem({ task, onPress }: TaskItemProps) {
   const statusLabel = task.status === 'completed' ? 'Completed' : 'Pending';
   const statusIcon = task.status === 'completed' ? '●' : '○';
   const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
@@ -14,7 +15,15 @@ export default function TaskItem({ task }: TaskItemProps) {
     task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground }]}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.card,
+        { backgroundColor: cardBackground },
+        pressed && onPress ? styles.cardPressed : null,
+      ]}
+      onPress={onPress ? () => onPress(task.id) : undefined}
+      disabled={!onPress}
+    >
       <View style={styles.titleRow}>
         <Text style={[styles.statusIcon, { color: statusColor }]}>
           {statusIcon}
@@ -27,7 +36,7 @@ export default function TaskItem({ task }: TaskItemProps) {
       <Text style={styles.description} numberOfLines={2}>
         {task.description}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -41,6 +50,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
+  },
+  cardPressed: {
+    opacity: 0.85,
   },
   titleRow: {
     flexDirection: 'row',
