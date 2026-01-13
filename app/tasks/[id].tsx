@@ -24,6 +24,9 @@ export default function TaskDetailsScreen() {
   const task = tasks.find((item) => item.id === taskId);
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
+  const [status, setStatus] = useState<TaskStatus>(
+    task?.status ?? 'pending'
+  );
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -34,6 +37,7 @@ export default function TaskDetailsScreen() {
     // Keep form fields in sync when the task changes.
     setTitle(task.title);
     setDescription(task.description);
+    setStatus(task.status);
   }, [task]);
 
   if (!task) {
@@ -45,9 +49,9 @@ export default function TaskDetailsScreen() {
     );
   }
 
-  const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
-  const statusIcon = task.status === 'completed' ? '●' : '○';
-  const cardBackground = task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
+  const statusColor = status === 'completed' ? '#16a34a' : '#f59e0b';
+  const statusIcon = status === 'completed' ? '●' : '○';
+  const cardBackground = status === 'completed' ? '#ecfdf3' : '#fffbeb';
 
   return (
     <View style={styles.container}>
@@ -105,14 +109,19 @@ export default function TaskDetailsScreen() {
           <Text style={[styles.sectionLabel, styles.sectionLabelSpacing]}>
             Status
           </Text>
-          <View style={styles.statusRow}>
+          <Pressable
+            style={styles.statusRow}
+            onPress={() =>
+              setStatus(status === 'completed' ? 'pending' : 'completed')
+            }
+          >
             <Text style={[styles.statusIcon, { color: statusColor }]}>
               {statusIcon}
             </Text>
             <Text style={[styles.statusText, { color: statusColor }]}>
-              {getStatusLabel(task.status)}
+              {getStatusLabel(status)}
             </Text>
-          </View>
+          </Pressable>
         </View>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -128,6 +137,7 @@ export default function TaskDetailsScreen() {
             updateTask(task.id, {
               title: title.trim(),
               description: description.trim(),
+              status,
             });
             setError('');
             router.back();
@@ -204,9 +214,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
+    alignSelf: 'flex-start',
   },
   statusIcon: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     marginRight: 8,
   },

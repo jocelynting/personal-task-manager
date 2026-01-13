@@ -6,7 +6,7 @@ import { useTasks } from '../context/TasksContext';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { tasks, deleteTask } = useTasks();
+  const { tasks, deleteTask, toggleTaskStatus } = useTasks();
 
   return (
     <View style={styles.container}>
@@ -33,6 +33,7 @@ export default function HomeScreen() {
                 ]
               )
             }
+            onToggleStatus={toggleTaskStatus}
           />
         )}
       />
