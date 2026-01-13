@@ -1,9 +1,12 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import TaskItem from '../components/TaskItem';
 import { mockTasks } from '../data/tasks';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>My Tasks</Text>
@@ -12,7 +15,12 @@ export default function HomeScreen() {
         keyExtractor={(task) => task.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <TaskItem task={item} />}
+        renderItem={({ item }) => (
+          <TaskItem
+            task={item}
+            onPress={(taskId) => router.push(`/tasks/${taskId}`)}
+          />
+        )}
       />
     </View>
   );

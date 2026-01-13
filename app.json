@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "personal-task-manager",
+    "scheme": "personal-task-manager",
     "slug": "personal-task-manager",
     "version": "1.0.0",
     "orientation": "portrait",
