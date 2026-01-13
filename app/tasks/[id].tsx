@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 
-import { mockTasks } from '../../data/tasks';
 import { TaskStatus } from '../../models/task';
+import { useTasks } from '../../context/TasksContext';
 
 function getStatusLabel(status: TaskStatus) {
   return status === 'completed' ? 'Completed' : 'Pending';
@@ -11,7 +11,8 @@ function getStatusLabel(status: TaskStatus) {
 export default function TaskDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const taskId = Array.isArray(id) ? id[0] : id;
-  const task = mockTasks.find((item) => item.id === taskId);
+  const { tasks } = useTasks();
+  const task = tasks.find((item) => item.id === taskId);
 
   if (!task) {
     return (
