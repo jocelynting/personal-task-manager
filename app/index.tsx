@@ -1,17 +1,17 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import TaskItem from '../components/TaskItem';
-import { mockTasks } from '../data/tasks';
+import { useTasks } from '../context/TasksContext';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { tasks } = useTasks();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>My Tasks</Text>
       <FlatList
-        data={mockTasks}
+        data={tasks}
         keyExtractor={(task) => task.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -31,13 +31,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f3f4f6',
     paddingHorizontal: 16,
-    paddingTop: 56,
-  },
-  heading: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 16,
+    paddingTop: 24,
   },
   listContent: {
     paddingBottom: 24,
