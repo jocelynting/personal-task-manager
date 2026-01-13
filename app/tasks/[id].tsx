@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { TaskStatus } from '../../models/task';
 import { useTasks } from '../../context/TasksContext';
@@ -9,10 +10,14 @@ function getStatusLabel(status: TaskStatus) {
 }
 
 export default function TaskDetailsScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const taskId = Array.isArray(id) ? id[0] : id;
-  const { tasks } = useTasks();
+  const { tasks, updateTask } = useTasks();
   const task = tasks.find((item) => item.id === taskId);
+  const [title, setTitle] = useState(task?.title ?? '');
+  const [description, setDescription] = useState(task?.description ?? '');
+  const [error, setError] = useState('');
 
   if (!task) {
     return (
@@ -23,6 +28,11 @@ export default function TaskDetailsScreen() {
     );
   }
 
+  useEffect(() => {
+    setTitle(task.title);
+    setDescription(task.description);
+  }, [task]);
+
   const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
   const statusIcon = task.status === 'completed' ? '●' : '○';
   const cardBackground = task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
@@ -32,16 +42,29 @@ export default function TaskDetailsScreen() {
       <View style={[styles.card, { backgroundColor: cardBackground }]}>
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Title</Text>
-          <View style={styles.readonlyField}>
-            <Text style={styles.titleText}>{task.title}</Text>
-          </View>
+          <TextInput
+            value={title}
+            onChangeText={(value) => {
+              setTitle(value);
+              if (error) {
+                setError('');
+              }
+            }}
+            placeholder="Enter a task title"
+            style={styles.input}
+          />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Description</Text>
-          <View style={styles.readonlyField}>
-            <Text style={styles.descriptionText}>{task.description}</Text>
-          </View>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Optional details"
+            style={[styles.input, styles.textArea]}
+            multiline
+            textAlignVertical="top"
+          />
         </View>
 
         <View style={styles.section}>
@@ -55,6 +78,27 @@ export default function TaskDetailsScreen() {
             </Text>
           </View>
         </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <Pressable
+          style={styles.saveButton}
+          onPress={() => {
+            if (!title.trim()) {
+              setError('Title is required.');
+              return;
+            }
+
+            updateTask(task.id, {
+              title: title.trim(),
+              description: description.trim(),
+            });
+            setError('');
+            router.back();
+          }}
+        >
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -87,16 +131,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 6,
   },
-  readonlyField: {
+  input: {
     backgroundColor: '#ffffff',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
-  },
-  titleText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
     color: '#111827',
+  },
+  textArea: {
+    minHeight: 120,
   },
   statusRow: {
     flexDirection: 'row',
@@ -111,10 +155,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  descriptionText: {
+  errorText: {
+    color: '#dc2626',
+    fontSize: 13,
+    marginBottom: 12,
+  },
+  saveButton: {
+    alignSelf: 'center',
+    backgroundColor: '#0f766e',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    minWidth: 180,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#ffffff',
     fontSize: 15,
-    color: '#374151',
-    lineHeight: 22,
+    fontWeight: '600',
   },
   notFound: {
     fontSize: 16,
