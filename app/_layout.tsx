@@ -1,35 +1,42 @@
+import 'react-native-gesture-handler';
 import 'react-native-get-random-values';
 import { Stack, router } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { TasksProvider } from '../context/TasksContext';
 
 export default function RootLayout() {
   return (
-    <TasksProvider>
-      <Stack>
-        <Stack.Screen
-          name="index"
-          options={{
-            title: 'Tasks',
-            headerRight: () => (
-              <Pressable
-                onPress={() => router.push('/tasks/new')}
-                style={styles.headerButton}
-              >
-                <Text style={styles.headerButtonText}>+</Text>
-              </Pressable>
-            ),
-          }}
-        />
-        <Stack.Screen name="tasks/new" options={{ title: 'Add Task' }} />
-        <Stack.Screen name="tasks/[id]" options={{ title: 'Task Details' }} />
-      </Stack>
-    </TasksProvider>
+    <GestureHandlerRootView style={styles.root}>
+      <TasksProvider>
+        <Stack>
+          <Stack.Screen
+            name="index"
+            options={{
+              title: 'Tasks',
+              headerRight: () => (
+                <Pressable
+                  onPress={() => router.push('/tasks/new')}
+                  style={styles.headerButton}
+                >
+                  <Text style={styles.headerButtonText}>+</Text>
+                </Pressable>
+              ),
+            }}
+          />
+          <Stack.Screen name="tasks/new" options={{ title: 'Add Task' }} />
+          <Stack.Screen name="tasks/[id]" options={{ title: 'Task Details' }} />
+        </Stack>
+      </TasksProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   headerButton: {
     backgroundColor: '#0f766e',
     borderRadius: 16,

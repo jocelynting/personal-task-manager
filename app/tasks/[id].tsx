@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { TaskStatus } from '../../models/task';
@@ -13,11 +20,21 @@ export default function TaskDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const taskId = Array.isArray(id) ? id[0] : id;
-  const { tasks, updateTask } = useTasks();
+  const { tasks, updateTask, deleteTask } = useTasks();
   const task = tasks.find((item) => item.id === taskId);
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!task) {
+      return;
+    }
+
+    // Keep form fields in sync when the task changes.
+    setTitle(task.title);
+    setDescription(task.description);
+  }, [task]);
 
   if (!task) {
     return (
@@ -28,11 +45,6 @@ export default function TaskDetailsScreen() {
     );
   }
 
-  useEffect(() => {
-    setTitle(task.title);
-    setDescription(task.description);
-  }, [task]);
-
   const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
   const statusIcon = task.status === 'completed' ? '●' : '○';
   const cardBackground = task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
@@ -41,7 +53,27 @@ export default function TaskDetailsScreen() {
     <View style={styles.container}>
       <View style={[styles.card, { backgroundColor: cardBackground }]}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Title</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Title</Text>
+            <Pressable
+              onPress={() =>
+                Alert.alert('Delete task?', 'This action cannot be undone.', [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                      deleteTask(task.id);
+                      router.back();
+                    },
+                  },
+                ])
+              }
+              style={styles.deleteInlineButton}
+            >
+              <Text style={styles.deleteInlineText}>Delete</Text>
+            </Pressable>
+          </View>
           <TextInput
             value={title}
             onChangeText={(value) => {
@@ -56,7 +88,9 @@ export default function TaskDetailsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Description</Text>
+          <Text style={[styles.sectionLabel, styles.sectionLabelSpacing]}>
+            Description
+          </Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
@@ -68,7 +102,9 @@ export default function TaskDetailsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Status</Text>
+          <Text style={[styles.sectionLabel, styles.sectionLabelSpacing]}>
+            Status
+          </Text>
           <View style={styles.statusRow}>
             <Text style={[styles.statusIcon, { color: statusColor }]}>
               {statusIcon}
@@ -109,11 +145,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f3f4f6',
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: 32,
   },
   card: {
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 20,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -121,7 +159,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   sectionLabel: {
     fontSize: 12,
@@ -129,7 +173,21 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 6,
+  },
+  sectionLabelSpacing: {
+    marginBottom: 10,
+  },
+  deleteInlineButton: {
+    backgroundColor: '#b91c1c',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginLeft: 12,
+  },
+  deleteInlineText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   input: {
     backgroundColor: '#ffffff',
@@ -140,11 +198,12 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   textArea: {
-    minHeight: 120,
+    minHeight: 140,
   },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 6,
   },
   statusIcon: {
     fontSize: 16,

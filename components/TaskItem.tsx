@@ -1,50 +1,103 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { Task } from '../models/task';
 
 interface TaskItemProps {
   task: Task;
   onPress?: (taskId: string) => void;
+  onDelete?: (taskId: string) => void;
 }
 
-export default function TaskItem({ task, onPress }: TaskItemProps) {
+export default function TaskItem({ task, onPress, onDelete }: TaskItemProps) {
+  const [isSwipeOpen, setIsSwipeOpen] = useState(false);
+  const [isSwiping, setIsSwiping] = useState(false);
   const statusLabel = task.status === 'completed' ? 'Completed' : 'Pending';
   const statusIcon = task.status === 'completed' ? '●' : '○';
   const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
   const cardBackground =
     task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
 
+  const renderRightActions = () => {
+    if (!onDelete) {
+      return null;
+    }
+
+    return (
+      <Pressable
+        style={styles.deleteAction}
+        onPress={() => onDelete(task.id)}
+      >
+        <Text style={styles.deleteActionText}>Delete</Text>
+      </Pressable>
+    );
+  };
+
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        { backgroundColor: cardBackground },
-        pressed && onPress ? styles.cardPressed : null,
-      ]}
-      onPress={onPress ? () => onPress(task.id) : undefined}
-      disabled={!onPress}
-    >
-      <View style={styles.titleRow}>
-        <Text style={[styles.statusIcon, { color: statusColor }]}>
-          {statusIcon}
-        </Text>
-        <Text style={styles.title}>{task.title}</Text>
-      </View>
-      <Text style={[styles.status, { color: statusColor }]}>
-        {statusLabel}
-      </Text>
-      <Text style={styles.description} numberOfLines={2}>
-        {task.description}
-      </Text>
-    </Pressable>
+    <View style={styles.wrapper}>
+      <ReanimatedSwipeable
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        rightThreshold={24}
+        friction={2}
+        // Guard against accidental taps while swiping.
+        onSwipeableWillOpen={() => {
+          setIsSwiping(true);
+          setIsSwipeOpen(true);
+        }}
+        onSwipeableWillClose={() => {
+          setIsSwiping(true);
+          setIsSwipeOpen(false);
+        }}
+        onSwipeableOpen={() => {
+          setIsSwiping(false);
+          setIsSwipeOpen(true);
+        }}
+        onSwipeableClose={() => {
+          setIsSwiping(false);
+          setIsSwipeOpen(false);
+        }}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.card,
+            { backgroundColor: cardBackground },
+            pressed && onPress && !isSwipeOpen ? styles.cardPressed : null,
+          ]}
+          onPressIn={() => setIsSwiping(false)}
+          onPress={
+            onPress && !isSwipeOpen && !isSwiping
+              ? () => onPress(task.id)
+              : undefined
+          }
+          disabled={!onPress || isSwipeOpen || isSwiping}
+        >
+          <View style={styles.titleRow}>
+            <Text style={[styles.statusIcon, { color: statusColor }]}>
+              {statusIcon}
+            </Text>
+            <Text style={styles.title}>{task.title}</Text>
+          </View>
+          <Text style={[styles.status, { color: statusColor }]}>
+            {statusLabel}
+          </Text>
+          <Text style={styles.description} numberOfLines={2}>
+            {task.description}
+          </Text>
+        </Pressable>
+      </ReanimatedSwipeable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 12,
+  },
   card: {
     borderRadius: 12,
     padding: 14,
-    marginBottom: 12,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -79,5 +132,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
     marginTop: 8,
+  },
+  deleteAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fee2e2',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    width: 88,
+    height: '100%',
+  },
+  deleteActionText: {
+    color: '#b91c1c',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

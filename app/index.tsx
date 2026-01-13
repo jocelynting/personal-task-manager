@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import TaskItem from '../components/TaskItem';
@@ -6,7 +6,7 @@ import { useTasks } from '../context/TasksContext';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { tasks } = useTasks();
+  const { tasks, deleteTask } = useTasks();
 
   return (
     <View style={styles.container}>
@@ -19,6 +19,20 @@ export default function HomeScreen() {
           <TaskItem
             task={item}
             onPress={(taskId) => router.push(`/tasks/${taskId}`)}
+            onDelete={(taskId) =>
+              Alert.alert(
+                'Delete task?',
+                'This action cannot be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => deleteTask(taskId),
+                  },
+                ]
+              )
+            }
           />
         )}
       />
