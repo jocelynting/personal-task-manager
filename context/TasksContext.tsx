@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { initialTasks } from '../data/tasks';
-import { Task } from '../models/task';
+import { Task, TaskStatus } from '../models/task';
 
 interface TaskInput {
   title: string;
@@ -42,7 +42,7 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         id: uuidv4(),
         title,
         description,
-        status: 'pending',
+        status: TaskStatus.Pending,
       },
       ...prevTasks,
     ]);
@@ -66,7 +66,10 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         task.id === taskId
           ? {
               ...task,
-              status: task.status === 'completed' ? 'pending' : 'completed',
+              status:
+                task.status === TaskStatus.Completed
+                  ? TaskStatus.Pending
+                  : TaskStatus.Completed,
             }
           : task
       )

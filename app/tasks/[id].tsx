@@ -13,7 +13,7 @@ import { TaskStatus } from '../../models/task';
 import { useTasks } from '../../context/TasksContext';
 
 function getStatusLabel(status: TaskStatus) {
-  return status === 'completed' ? 'Completed' : 'Pending';
+  return status === TaskStatus.Completed ? 'Completed' : 'Pending';
 }
 
 export default function TaskDetailsScreen() {
@@ -25,20 +25,9 @@ export default function TaskDetailsScreen() {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [status, setStatus] = useState<TaskStatus>(
-    task?.status ?? 'pending'
+    task?.status ?? TaskStatus.Pending,
   );
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!task) {
-      return;
-    }
-
-    // Keep form fields in sync when the task changes.
-    setTitle(task.title);
-    setDescription(task.description);
-    setStatus(task.status);
-  }, [task]);
 
   if (!task) {
     return (
@@ -49,9 +38,10 @@ export default function TaskDetailsScreen() {
     );
   }
 
-  const statusColor = status === 'completed' ? '#16a34a' : '#f59e0b';
-  const statusIcon = status === 'completed' ? '●' : '○';
-  const cardBackground = status === 'completed' ? '#ecfdf3' : '#fffbeb';
+  const statusColor = status === TaskStatus.Completed ? '#16a34a' : '#f59e0b';
+  const statusIcon = status === TaskStatus.Completed ? '●' : '○';
+  const cardBackground =
+    status === TaskStatus.Completed ? '#ecfdf3' : '#fffbeb';
 
   return (
     <View style={styles.container}>
@@ -112,7 +102,11 @@ export default function TaskDetailsScreen() {
           <Pressable
             style={styles.statusRow}
             onPress={() =>
-              setStatus(status === 'completed' ? 'pending' : 'completed')
+              setStatus(
+                status === TaskStatus.Completed
+                  ? TaskStatus.Pending
+                  : TaskStatus.Completed,
+              )
             }
           >
             <Text style={[styles.statusIcon, { color: statusColor }]}>

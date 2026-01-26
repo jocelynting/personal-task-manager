@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
-import { Task } from '../models/task';
+import { Task, TaskStatus } from '../models/task';
 
 interface TaskItemProps {
   task: Task;
@@ -19,11 +19,13 @@ export default function TaskItem({
 }: TaskItemProps) {
   const [isSwipeOpen, setIsSwipeOpen] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
-  const statusLabel = task.status === 'completed' ? 'Completed' : 'Pending';
-  const statusIcon = task.status === 'completed' ? '●' : '○';
-  const statusColor = task.status === 'completed' ? '#16a34a' : '#f59e0b';
+  const statusLabel =
+    task.status === TaskStatus.Completed ? 'Completed' : 'Pending';
+  const statusIcon = task.status === TaskStatus.Completed ? '●' : '○';
+  const statusColor =
+    task.status === TaskStatus.Completed ? '#16a34a' : '#f59e0b';
   const cardBackground =
-    task.status === 'completed' ? '#ecfdf3' : '#fffbeb';
+    task.status === TaskStatus.Completed ? '#ecfdf3' : '#fffbeb';
 
   const renderRightActions = () => {
     if (!onDelete) {
